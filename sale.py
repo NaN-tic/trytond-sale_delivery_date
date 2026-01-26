@@ -6,8 +6,6 @@ from trytond.model import fields
 from trytond.pyson import Eval, Bool, If
 from trytond.transaction import Transaction
 
-__all__ = ['Sale', 'SaleLine']
-
 
 class Sale(metaclass=PoolMeta):
     __name__ = 'sale.sale'
@@ -28,12 +26,12 @@ class Sale(metaclass=PoolMeta):
                                 }))
         if to_write:
             SaleLine.write(*to_write)
-        super(Sale, cls).process(sales)
+        super().process(sales)
 
     def _group_shipment_key(self, moves, move):
         # Group shipments by move planned_date, so one shipment is created
         # for each planned_date
-        grouping = super(Sale, self)._group_shipment_key(moves, move)
+        grouping = super()._group_shipment_key(moves, move)
         new_grouping = [('planned_date', move[1].planned_date)]
         for field, value in grouping:
             if field == 'planned_date':
@@ -45,16 +43,16 @@ class Sale(metaclass=PoolMeta):
 class SaleLine(metaclass=PoolMeta):
     __name__ = 'sale.line'
     manual_delivery_date = fields.Date('Delivery Date',
-            states={
-                'invisible': ((Eval('type') != 'line')
-                    | (If(Bool(Eval('quantity')), Eval('quantity', 0), 0)
-                        <= 0)),
-                },
-            depends=['type', 'quantity'])
+        states={
+            'readonly': Eval('sale_state') != 'draft',
+            'invisible': ((Eval('type') != 'line')
+                | (If(Bool(Eval('quantity')), Eval('quantity', 0), 0)
+                    <= 0)),
+            })
 
     @classmethod
     def __setup__(cls):
-        super(SaleLine, cls).__setup__()
+        super().__setup__()
         cls.shipping_date.states['invisible'] = True
 
     @classmethod
@@ -67,7 +65,7 @@ class SaleLine(metaclass=PoolMeta):
         move_delivery_dates = (not table.column_exist('manual_delivery_date')
             and table.column_exist('shipping_date'))
 
-        super(SaleLine, cls).__register__(module_name)
+        super().__register__(module_name)
 
         if move_delivery_dates:
             cursor.execute(*sql_table.update(
