@@ -1,6 +1,5 @@
 # The COPYRIGHT file at the top level of this repository contains the full
 # copyright notices and license terms.
-from trytond import backend
 from trytond.pool import Pool, PoolMeta
 from trytond.model import fields
 from trytond.pyson import Eval, Bool, If
@@ -61,7 +60,7 @@ class SaleLine(metaclass=PoolMeta):
         sql_table = cls.__table__()
 
         # Migration from 3.2
-        table = backend.TableHandler(cls, module_name)
+        table = cls.__table_handler__(module_name)
         move_delivery_dates = (not table.column_exist('manual_delivery_date')
             and table.column_exist('shipping_date'))
 
