@@ -1,7 +1,7 @@
 # The COPYRIGHT file at the top level of this repository contains the full
 # copyright notices and license terms.
 from trytond.pool import Pool, PoolMeta
-from trytond.model import fields
+from trytond.model import ModelView, fields
 from trytond.pyson import Eval, Bool, If
 from trytond.transaction import Transaction
 
@@ -10,6 +10,7 @@ class Sale(metaclass=PoolMeta):
     __name__ = 'sale.sale'
 
     @classmethod
+    @ModelView.button
     def process(cls, sales):
         pool = Pool()
         SaleLine = pool.get('sale.line')
